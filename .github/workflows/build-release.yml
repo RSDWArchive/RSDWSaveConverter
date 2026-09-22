@@ -81,6 +81,7 @@ jobs:
           }
 
           gh release create $env:GITHUB_REF_NAME $assets.FullName `
+            --repo $env:GITHUB_REPOSITORY `
             --verify-tag `
             --generate-notes `
             --title "RSDW Save Converter $env:GITHUB_REF_NAME"

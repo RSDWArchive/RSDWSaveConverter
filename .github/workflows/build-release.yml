@@ -1,0 +1,89 @@
+name: Build and release
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Windows release
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore RSDWSaveConverter.sln
+
+      - name: Test
+        run: dotnet test RSDWSaveConverter.sln --configuration Release --no-restore
+
+      - name: Verify release tag matches project version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          $project = [xml](Get-Content src/RSDWSaveConverter.App/RSDWSaveConverter.App.csproj -Raw)
+          $version = $project.SelectSingleNode("/Project/PropertyGroup/Version").InnerText.Trim()
+          if ($env:GITHUB_REF_NAME -ne "v$version") {
+            throw "Tag '$env:GITHUB_REF_NAME' does not match project version 'v$version'."
+          }
+
+      - name: Package release assets
+        shell: pwsh
+        run: ./scripts/publish.ps1 -Configuration Release -Runtime win-x64 -SkipTests
+
+      - name: Upload release assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: RSDWSaveConverter-win-x64
+          if-no-files-found: error
+          path: |
+            artifacts/RSDWSaveConverter-v*-win-x64.exe
+            artifacts/RSDWSaveConverter-v*-win-x64.zip
+            artifacts/RSDWSaveConverter-v*-win-x64.sha256
+
+  release:
+    name: Publish GitHub release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download release assets
+        uses: actions/download-artifact@v4
+        with:
+          name: RSDWSaveConverter-win-x64
+          path: release-assets
+
+      - name: Create GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $assets = Get-ChildItem release-assets -File -Recurse | Sort-Object Name
+          if ($assets.Count -ne 3) {
+            throw "Expected three release assets, found $($assets.Count)."
+          }
+
+          gh release create $env:GITHUB_REF_NAME $assets.FullName `
+            --verify-tag `
+            --generate-notes `
+            --title "RSDW Save Converter $env:GITHUB_REF_NAME"
+          if ($LASTEXITCODE -ne 0) {
+            throw "GitHub release creation failed."
+          }

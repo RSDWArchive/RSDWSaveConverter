@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\RSDWSaveConverter.Core\RSDWSaveConverter.Core.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>RSDWSaveConverter</AssemblyName>
+    <AssemblyTitle>RSDW Save Converter</AssemblyTitle>
+    <RootNamespace>RSDWSaveConverter.App</RootNamespace>
+    <ApplicationIcon>Assets\RSDWSaveConverter.ico</ApplicationIcon>
+    <Product>RSDW Save Converter</Product>
+    <Description>Portable RuneScape: Dragonwilds save importer for Xbox Game Pass.</Description>
+    <Authors>RSDW</Authors>
+    <Copyright>Copyright (c) 2026 RSDW</Copyright>
+    <Version>0.1.0</Version>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>
+    <InformationalVersion>0.1.0</InformationalVersion>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <PublishTrimmed>false</PublishTrimmed>
+  </PropertyGroup>
+
+</Project>
